@@ -1,6 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -21,7 +22,6 @@ public class AuthController : ControllerBase
         _configuration = configuration;
         _dbContext = dbContext;
     }
-
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] CreateuserRequest request, CancellationToken ct)
     {
@@ -32,7 +32,22 @@ public class AuthController : ControllerBase
 
         return Ok(user);
     }
+    [HttpPost("delete/({id})")]
+    public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
+    {
+        var customer = await _dbContext.Users.FindAsync(id);
 
+        if (customer != null)
+        {
+            _dbContext.Users.Remove(customer);
+            await _dbContext.SaveChangesAsync(ct);
+            return Ok();
+        }
+
+        return NotFound();
+    }
+
+    
     [HttpPost("login")]
     public async Task<IActionResult> Login(UserDto request, CancellationToken ct)
     {
