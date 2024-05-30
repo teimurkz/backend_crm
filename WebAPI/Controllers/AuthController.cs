@@ -32,7 +32,7 @@ public class AuthController : ControllerBase
 
         return Ok(user);
     }
-    [HttpPost("delete/({id})")]
+    [HttpPost("delete/({id})"),Authorize]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
         var customer = await _dbContext.Users.FindAsync(id);
@@ -79,11 +79,12 @@ public class AuthController : ControllerBase
 
         var token = new JwtSecurityToken(
             claims: claims,
-            expires: DateTime.Now.AddDays(1),
+            expires: DateTime.Now.AddSeconds(30),
             signingCredentials: creds
         );
 
         var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+       Console.WriteLine(jwt);
         return jwt;
     }
 }
